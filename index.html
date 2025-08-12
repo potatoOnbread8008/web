@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OMD</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    :root {
+      --main-color: #ff5c8d;
+      --bg-light: #fff;
+      --bg-dark: #121212;
+      --text-light: #333;
+      --text-dark: #eee;
+      --transition: 0.3s ease;
+    }
+
+    body {
+      background: var(--bg-light);
+      color: var(--text-light);
+      transition: background 0.5s, color 0.5s;
+    }
+
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    /* Navigation */
+    header {
+      position: fixed;
+      width: 100%;
+      background: var(--main-color);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+
+    header h1 {
+      color: white;
+      font-weight: 700;
+      font-size: 1.6rem;
+      cursor: default;
+      letter-spacing: 2px;
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    nav a:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* Hamburger menu for small screens */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+    }
+
+    .hamburger div {
+      width: 25px;
+      height: 3px;
+      background: white;
+      border-radius: 3px;
+      transition: 0.3s;
+    }
+
+    /* Mobile nav toggle */
+    nav.mobile-nav {
+      position: fixed;
+      top: 60px;
+      right: 0;
+      background: var(--main-color);
+      flex-direction: column;
+      width: 200px;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      padding: 20px;
+      border-radius: 8px 0 0 8px;
+      box-shadow: -3px 0 6px rgba(0,0,0,0.2);
+      z-index: 999;
+    }
+
+    nav.mobile-nav.open {
+      transform: translateX(0);
+    }
+
+    nav.mobile-nav a {
+      padding: 12px 0;
+      font-size: 1.2rem;
+    }
+
+    /* Sections */
+    section {
+      padding: 100px 30px 60px 30px;
+      max-width: 900px;
+      margin: 0 auto;
+      min-height: 80vh;
+    }
+
+    section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: var(--main-color);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+    }
+
+    section p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    /* Color Picker */
+    .color-picker-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    input[type="color"] {
+      border: none;
+      cursor: pointer;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      padding: 0;
+      -webkit-appearance: none;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border-radius: 50%;
+    }
+
+    /* Dark mode toggle */
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: #ccc;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-left: 20px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch.active {
+      background: var(--main-color);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
+    }
+
+    .toggle-switch.active::after {
+      left: 26px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      background: var(--main-color);
+      color: white;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: background-color 0.3s, transform 0.3s;
+      box-shadow: 0 6px 15px rgba(255, 92, 141, 0.6);
+      user-select: none;
+    }
+
+    .btn:hover {
+      background: #e0497a;
+      transform: scale(1.1);
+    }
+
+    /* Confetti container */
+    #confetti-canvas {
+      pointer-events: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1500;
+      display: none;
+    }
+
+    /* Woody image container */
+    #woodyContainer img {
+      max-width: 200px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    /* Form styles */
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    label[for] {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+      color: var(--main-color);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--main-color);
+      outline: none;
+    }
+
+    .error-msg {
+      color: #ff4d6d;
+      font-size: 0.9rem;
+      margin-top: -15px;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .success-msg {
+      color: green;
+      font-size: 1rem;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+    }
+
+    /* Scroll reveal animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.7s ease;
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav {
+        display: none;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      section {
+        padding: 100px 20px 60px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>VibrantSite</h1>
+    <nav id="nav-links">
+      <a href="#home">Home</a>
+      <a href="#features">Features</a>
+      <a href="#color-picker">Theme</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="hamburger" id="hamburger" aria-label="Toggle navigation menu" role="button" tabindex="0">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </header>
+
+  <nav class="mobile-nav" id="mobile-nav">
+    <a href="#home" class="mobile-link">Home</a>
+    <a href="#features" class="mobile-link">Features</a>
+    <a href="#color-picker" class="mobile-link">Theme</a>
+    <a href="#contact" class="mobile-link">Contact</a>
+  </nav>
+
+  <main>
+    <section id="home" class="reveal">
+      <h2>Welcome to VibrantSite!</h2>
+      <p>Your go-to interactive colorful website with fun features, animations, and custom themes.</p>
+      <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn" id="celebrateBtn">Celebrate 🎉</button>
+        <button class="btn" id="woodyBtn">Woody Toy 🤠</button>
+      </div>
+      <div id="woodyContainer" style="margin-top: 30px; text-align: center; display: none;">
+     <img
+        src="https://media1.tenor.com/m/sdqcOW9sBKcAAAAd/woody-doing.gif"
+        alt="Woody Toy Story Twerking"
+    />
+      </div>
+    </section>
+
+    <section id="features" class="reveal">
+      <h2>Features</h2>
+      <p>Explore the interactive elements including color themes, dark mode, responsive navigation, animations, and more!</p>
+      <ul>
+        <li>Responsive and colorful design</li>
+        <li>Dark mode toggle</li>
+        <li>Dynamic theme color picker</li>
+        <li>Confetti celebration effect</li>
+        <li>Smooth scrolling navigation</li>
+        <li>Simple contact form with validation</li>
+      </ul>
+    </section>
+
+    <section id="color-picker" class="reveal">
+      <h2>Pick Your Theme Color</h2>
+      <p>Choose a color below to change the main theme color dynamically:</p>
+      <div class="color-picker-container">
+        <label for="colorInput">Theme Color:</label>
+        <input type="color" id="colorInput" value="#ff5c8d" />
+        <label for="darkModeToggle">Dark Mode:</label>
+        <div class="toggle-switch" id="darkModeToggle" title="Toggle Dark Mode" role="button" tabindex="0"></div>
+      </div>
+    </section>
+
+    <section id="contact" class="reveal">
+      <h2>Contact Us</h2>
+      <p>Send us a message! We’d love to hear from you.</p>
+      <form id="contactForm" novalidate>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required minlength="2" placeholder="Your name" />
+        <div class="error-msg" id="nameError">Please enter at least 2 characters.</div>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required placeholder="your@email.com" />
+        <div class="error-msg" id="emailError">Please enter a valid email address.</div>
+
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" required minlength="10" rows="4" placeholder="Your message"></textarea>
+        <div class="error-msg" id="messageError">Please enter at least 10 characters.</div>
+
+        <button type="submit" class="btn">Send Message</button>
+      </form>
+      <div class="success-msg" id="successMsg">Thank you! Your message has been sent.</div>
+    </section>
+  </main>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <script>
+    // Hamburger menu toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+    hamburger.addEventListener('click', () => {
+      mobileNav.classList.toggle('open');
+      hamburger.classList.toggle('open');
+    });
+    // Also support keyboard toggle
+    hamburger.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        hamburger.click();
+      }
+    });
+
+    // Close mobile nav on link click
+    document.querySelectorAll('.mobile-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileNav.classList.remove('open');
+        hamburger.classList.remove('open');
+      });
+    });
+
+    // Dark mode toggle
+    const darkToggle = document.getElementById('darkModeToggle');
+    darkToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      darkToggle.classList.toggle('active');
+    });
+    // Keyboard support for dark toggle
+    darkToggle.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        darkToggle.click();
+      }
+    });
+
+    // Color picker
+    const colorInput = document.getElementById('colorInput');
+    colorInput.addEventListener('input', e => {
+      document.documentElement.style.setProperty('--main-color', e.target.value);
+    });
+
+    // Scroll reveal animation
+    function revealOnScroll() {
+      const reveals = document.querySelectorAll('.reveal');
+      const windowHeight = window.innerHeight;
+      reveals.forEach(el => {
+        const elementTop = el.getBoundingClientRect().top;
+        if (elementTop < windowHeight - 100) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+    }
+    window.addEventListener('scroll', revealOnScroll);
+    window.addEventListener('load', revealOnScroll);
+
+    // Confetti effect for Celebrate button
+    const celebrateBtn = document.getElementById('celebrateBtn');
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const ctx = confettiCanvas.getContext('2d');
+
+    let confettiPieces = [];
+
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function ConfettiPiece() {
+      this.x = randomRange(0, window.innerWidth);
+      this.y = randomRange(-20, -100);
+      this.size = randomRange(7, 12);
+      this.speed = randomRange(2, 5);
+      this.angle = randomRange(0, 2 * Math.PI);
+      this.spin = randomRange(0.05, 0.1);
+      this.color = `hsl(${randomRange(0, 360)}, 70%, 60%)`;
+      this.tilt = randomRange(-10, 10);
+      this.tiltAngle = 0;
+      this.tiltSpeed = randomRange(0.1, 0.3);
+    }
+
+    ConfettiPiece.prototype.update = function() {
+      this.y += this.speed;
+      this.tiltAngle += this.tiltSpeed;
+      this.tilt = Math.sin(this.tiltAngle) * 10;
+      if (this.y > window.innerHeight) {
+        this.y = randomRange(-20, -100);
+        this.x = randomRange(0, window.innerWidth);
+      }
+    }
+
+    ConfettiPiece.prototype.draw = function(ctx) {
+      ctx.beginPath();
+      ctx.lineWidth = this.size / 2;
+      ctx.strokeStyle = this.color;
+      ctx.moveTo(this.x + this.tilt, this.y);
+      ctx.lineTo(this.x + this.tilt + this.size / 2, this.y + this.tilt + this.size);
+      ctx.stroke();
+    }
+
+    function setupConfetti() {
+      confettiPieces = [];
+      for(let i=0; i<150; i++) {
+        confettiPieces.push(new ConfettiPiece());
+      }
+    }
+
+    function resizeCanvas() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let confettiActive = false;
+    let confettiTimeout;
+
+    function startConfetti() {
+      if(confettiActive) return;
+      confettiActive = true;
+      confettiCanvas.style.display = 'block';
+      setupConfetti();
+      animateConfetti();
+      confettiTimeout = setTimeout(stopConfetti, 5000);
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      confettiCanvas.style.display = 'none';
+      cancelAnimationFrame(animationFrameId);
+    }
+
+    let animationFrameId;
+    function animateConfetti() {
+      if (!confettiActive) return;
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiPieces.forEach(piece => {
+        piece.update();
+        piece.draw(ctx);
+      });
+      animationFrameId = requestAnimationFrame(animateConfetti);
+    }
+
+    celebrateBtn.addEventListener('click', () => {
+      startConfetti();
+    });
+
+    // Woody button toggle image
+    const woodyBtn = document.getElementById('woodyBtn');
+    const woodyContainer = document.getElementById('woodyContainer');
+
+    woodyBtn.addEventListener('click', () => {
+      if (woodyContainer.style.display === 'none' || woodyContainer.style.display === '') {
+        woodyContainer.style.display = 'block';
+      } else {
+        woodyContainer.style.display = 'none';
+      }
+    });
+
+    // Contact form validation
+    const contactForm = document.getElementById('contactForm');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const messageInput = document.getElementById('message');
+
+    const nameError = document.getElementById('nameError');
+    const emailError = document.getElementById('emailError');
+    const messageError = document.getElementById('messageError');
+    const successMsg = document.getElementById('successMsg');
+
+    function validateEmail(email) {
+      const re = /^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+      return re.test(String(email).toLowerCase());
+    }
+
+    contactForm.addEventListener('submit', e => {
+      e.preventDefault();
+
+      let valid = true;
+
+      if(nameInput.value.trim().length < 2){
+        nameError.style.display = 'block';
+        valid = false;
+      } else {
+        nameError.style.display = 'none';
+      }
+
+      if(!validateEmail(emailInput.value.trim())){
+        emailError.style.display = 'block';
+        valid = false;
+      } else {
+        emailError.style.display = 'none';
+      }
+
+      if(messageInput.value.trim().length < 10){
+        messageError.style.display = 'block';
+        valid = false;
+      } else {
+        messageError.style.display = 'none';
+      }
+
+      if(valid) {
+        successMsg.style.display = 'block';
+        contactForm.reset();
+
+        setTimeout(() => {
+          successMsg.style.display = 'none';
+        }, 5000);
+      } else {
+        successMsg.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
